@@ -1,11 +1,8 @@
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
-using Microsoft.ApplicationInsights;
 using Microsoft.ApplicationInsights.DataContracts;
 using Microsoft.ApplicationInsights.Extensibility;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.AspNetCore.Http;
@@ -15,10 +12,10 @@ using Newtonsoft.Json.Linq;
 
 namespace HelloWorldFunctionApp
 {
-    public class HelloWorldFunction
+	public static class HelloWorldFunction
     {
         [FunctionName("FarooqHelloWorld")]
-        public async Task<JObject> Run(
+        public static async Task<JObject> Run(
 			[HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)] HttpRequest req,
             ILogger log)
         {
