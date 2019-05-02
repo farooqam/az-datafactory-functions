@@ -1,5 +1,10 @@
 using System.IO;
+using System.Linq;
+using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
+using Microsoft.ApplicationInsights;
+using Microsoft.ApplicationInsights.DataContracts;
+using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
@@ -10,14 +15,17 @@ using Newtonsoft.Json.Linq;
 
 namespace HelloWorldFunctionApp
 {
-    public static class HelloWorldFunction
+    public class HelloWorldFunction
     {
         [FunctionName("FarooqHelloWorld")]
-        public static async Task<JObject> Run(
-            [HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)] HttpRequest req,
+        public async Task<JObject> Run(
+			[HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)] HttpRequest req,
             ILogger log)
         {
             log.LogInformation("C# HTTP trigger function processed a request.");
+
+	        RequestTelemetry telemetry = new RequestTelemetry();
+			TelemetryConfiguration.Active.TelemetryInitializers.OfType<OperationCorrelationTelemetryInitializer>().Single().Initialize(telemetry);
 
             string name = req.Query["name"];
 
@@ -26,8 +34,8 @@ namespace HelloWorldFunctionApp
             name = name ?? data?.name;
 
             return name != null
-                ? JObject.FromObject(new {message = $"Hello {name}!"})
-                : JObject.FromObject(new {error = "Specify a name."});
+                ? JObject.FromObject(new {message = $"Hello {name}!", operationId = telemetry.Context.Operation.Id})
+                : JObject.FromObject(new {error = "Specify a name.", operationId = telemetry.Context.Operation.Id});
         }
     }
 }
